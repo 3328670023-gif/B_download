@@ -389,3 +389,13 @@ bilibili-downloader/
 [哔哩哔哩用户协议](https://www.bilibili.com/protocal/licence.html) 与《著作权法》，
 不要用于批量转载、二次分发或任何商业用途。请尊重 UP 主与版权方的劳动成果，
 喜欢的视频请到 B 站点赞投币。因使用本工具产生的一切后果由使用者自行承担。
+
+---
+
+## 十二、许可证
+
+本项目采用 [MIT 许可证](LICENSE) 开源，你可以自由使用、修改、分发。
+
+需要注意：`vendor/` 目录里的 ffmpeg 是**独立的第三方二进制**，不在 MIT 的授权范围内。
+它的构建参数含 `--enable-gpl`，因此以 **GPL v2 或更高版本**授权，版权归 FFmpeg 开发者所有
+（源码见 <https://ffmpeg.org/>）。如果你要再分发这个二进制，请一并遵守 GPL 的要求。
