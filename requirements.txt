@@ -1,0 +1,7 @@
+# bili-dl 只使用 Python 标准库，没有必装的第三方依赖。
+# Python >= 3.8
+#
+# 可选：装一个 ffmpeg 用于合并 DASH 音视频（1080P 以上需要）
+#   brew install ffmpeg
+#   或
+#   pip install imageio-ffmpeg

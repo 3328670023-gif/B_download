@@ -1,0 +1,8 @@
+#!/bin/bash
+# 从 .app 包内部定位项目根目录，然后在「终端」里启动网页界面
+DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+if [ ! -f "$DIR/启动下载器.command" ]; then
+  osascript -e 'display alert "找不到 启动下载器.command" message "请把本 app 放在 bilibili-downloader 项目文件夹里。" as critical'
+  exit 1
+fi
+open -a Terminal "$DIR/启动下载器.command"

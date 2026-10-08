@@ -1,0 +1,19 @@
+# 下载产物与临时文件
+downloads/
+_test*/
+*.mp4
+*.m4s
+*.m4a
+*.parts.json
+.bili_tmp/
+
+# 私密信息
+config.json
+cookie.txt
+
+__pycache__/
+*.pyc
+.DS_Store
+
+# 网页界面的运行时数据
+web_data/

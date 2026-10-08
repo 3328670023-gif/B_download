@@ -1,0 +1,4 @@
+#!/bin/sh
+# bili-dl 便捷包装脚本：无需先 cd 到项目目录
+DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec python3 "$DIR/bili-dl.py" "$@"

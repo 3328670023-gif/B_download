@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B站下载器</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23fb7299'/><path d='M36 30l30 20-30 20z' fill='white'/></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">▶</span>
+    <span>B站下载器 <small id="ver"></small></span>
+  </div>
+  <div class="spacer"></div>
+  <div class="status">
+    <span class="pill" id="pill-login"><span class="dot"></span>检查中…</span>
+    <span class="pill" id="pill-ffmpeg"><span class="dot"></span>检查中…</span>
+    <button class="small ghost" id="btn-theme" title="切换深浅色">🌙</button>
+    <button class="small ghost" id="btn-settings">设置</button>
+  </div>
+</header>
+
+<main>
+  <!-- 输入 -->
+  <section class="card">
+    <div class="input-row">
+      <input type="text" id="input-url" autocomplete="off" spellcheck="false"
+             placeholder="粘贴 B 站视频链接 / BV号，或输入关键字搜索…">
+      <button class="primary" id="btn-parse">解析</button>
+    </div>
+    <div class="hint">
+      支持：视频链接 · BV/av号 · 番剧 ep/ss · 收藏夹 · UP主投稿 · 合集 · 关键字搜索
+      &nbsp;·&nbsp; 回车即可解析
+    </div>
+  </section>
+
+  <!-- 解析结果 -->
+  <section class="card" id="preview-card" hidden>
+    <div class="preview">
+      <img class="cover" id="pv-cover" alt="" referrerpolicy="no-referrer">
+      <div class="meta">
+        <h3 id="pv-title"></h3>
+        <div class="sub" id="pv-sub"></div>
+        <div class="desc" id="pv-desc"></div>
+      </div>
+    </div>
+
+    <div class="options">
+      <div class="opt-group">
+        <span>画质</span>
+        <select id="opt-quality" style="width:auto;min-width:150px"></select>
+      </div>
+      <div class="opt-group">
+        <span>编码</span>
+        <select id="opt-codec" style="width:auto">
+          <option value="avc">H.264（兼容最好）</option>
+          <option value="hevc">H.265 / HEVC</option>
+          <option value="av1">AV1（体积最小）</option>
+          <option value="best">不挑（码率最高）</option>
+        </select>
+      </div>
+      <div class="opt-group" id="wrap-pages" hidden>
+        <span>分P</span>
+        <input type="text" id="opt-pages" placeholder="如 1,3-5（留空=全部）" style="width:170px">
+      </div>
+      <div class="opt-group" id="wrap-maxitems" hidden>
+        <span>最多</span>
+        <input type="number" id="opt-maxitems" min="0" value="0" style="width:90px">
+        <span>个</span>
+      </div>
+    </div>
+
+    <div class="options">
+      <label><input type="checkbox" id="opt-cover" checked> 保存封面</label>
+      <label><input type="checkbox" id="opt-danmaku"> 保存弹幕</label>
+      <label><input type="checkbox" id="opt-subtitle"> 保存字幕</label>
+      <label><input type="checkbox" id="opt-audio"> 仅音频（m4a）</label>
+      <label><input type="checkbox" id="opt-video"> 仅画面</label>
+    </div>
+
+    <div class="quality-note" id="pv-quality-note"></div>
+    <div class="items-preview" id="pv-items" hidden></div>
+
+    <div class="actions">
+      <button class="primary" id="btn-download">开始下载</button>
+      <button id="btn-cancel-parse">取消</button>
+      <span class="hint" id="pv-outdir" style="margin:0"></span>
+    </div>
+  </section>
+
+  <!-- 任务 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>下载任务</h2>
+      <span class="pill" id="jobs-count">0 个</span>
+      <div class="spacer"></div>
+      <button class="small ghost" id="btn-open-folder">打开下载文件夹</button>
+    </div>
+    <div id="jobs"><div class="empty">还没有任务，在上面粘贴一个链接试试</div></div>
+  </section>
+
+  <!-- 历史 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>历史记录</h2>
+      <div class="spacer"></div>
+      <button class="small ghost danger" id="btn-clear-history">清空</button>
+    </div>
+    <div id="history"><div class="empty">暂无记录</div></div>
+  </section>
+</main>
+
+<!-- 设置 -->
+<dialog id="dlg-settings">
+  <div class="dlg-body">
+    <h2>设置</h2>
+    <div class="field">
+      <label for="set-outdir">下载目录</label>
+      <input type="text" id="set-outdir" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="set-workers">下载线程数（每个文件的分片并发数）</label>
+      <input type="number" id="set-workers" min="1" max="32" value="8">
+    </div>
+    <div class="field">
+      <label for="set-maxitems">批量下载时最多抓取多少个视频（0 = 不限）</label>
+      <input type="number" id="set-maxitems" min="0" value="0">
+    </div>
+    <div class="hint" id="set-cookie-hint">
+      想要 1080P 以上、收藏夹、UP主投稿列表和字幕，需要登录 Cookie。
+      在启动命令里加 <code>--cookie "SESSDATA=..."</code> 即可（详见 README）。
+    </div>
+    <div class="dlg-actions">
+      <button id="btn-settings-cancel">取消</button>
+      <button class="primary" id="btn-settings-save">保存</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<template id="tpl-job">
+  <div class="job">
+    <div class="job-head">
+      <span class="title"></span>
+      <span class="badge"></span>
+    </div>
+    <div class="src"></div>
+    <div class="bar"><i></i></div>
+    <div class="job-stats"></div>
+    <div class="job-actions"></div>
+    <div class="files" hidden></div>
+    <div class="logs" hidden></div>
+  </div>
+</template>
+
+<script src="/app.js"></script>
+</body>
+</html>
